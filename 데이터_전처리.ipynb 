@@ -1,0 +1,152 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "provenance": [],
+      "authorship_tag": "ABX9TyMz89Ira37w9oyv+2mVdZkb",
+      "include_colab_link": true
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    },
+    "language_info": {
+      "name": "python"
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "view-in-github",
+        "colab_type": "text"
+      },
+      "source": [
+        "<a href=\"https://colab.research.google.com/github/Yuni-J/dataKakao/blob/main/%EB%8D%B0%EC%9D%B4%ED%84%B0_%EC%A0%84%EC%B2%98%EB%A6%AC.ipynb%20\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "# 01 카카오톡 데이터 전처러\n"
+      ],
+      "metadata": {
+        "id": "r290MrAZFVfq"
+      }
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "구글 드라이브와 코랩 연결하기 (구글 드라이브 마운트)"
+      ],
+      "metadata": {
+        "id": "VuduBRL5Fi46"
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "from google.colab import drive\n",
+        "drive.mount('/content/drive')"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "dc1gtmx9Fr2c",
+        "outputId": "1b1231f7-1d0e-4476-a6c8-cce1fdf136a7"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Mounted at /content/drive\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "id": "6dMPUYhgEXa-"
+      },
+      "outputs": [],
+      "source": [
+        "import os\n",
+        "import pandas as pd\n",
+        "\n",
+        "## 폴더 경로\n",
+        "f_path = '/content/drive/MyDrive/KakaoTalk_data'\n",
+        "\n",
+        "## 파일 경로\n",
+        "files = {\n",
+        "    'katalk_friend.txt'\n",
+        "}"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "##정규 표현식 사용\n",
+        "\n",
+        "(\\d{4}년 \\d{1,2}월 \\d{1,2}일 \\w+요일)\\s+\\[([^\\]]+)\\]\\s+\\[(오전|오후) \\d{1,2}:\\d{2}\\]\\s+(.+)\n",
+        "\n",
+        "정규 표현식 설명:\n",
+        "\n",
+        "- (\\d{4}년 \\d{1,2}월 \\d{1,2}일 \\w+요일): 날짜를 추출합니다. 예: \"2022년 1월 16일 일요일\"\n",
+        "\n",
+        "- \\[([^\\]]+)\\]: 대화하는 사람의 이름을 추출합니다. 예: \"민지이잉\"\n",
+        "\n",
+        "- [(오전|오후) \\d{1,2}:\\d{2}\\]: 시간을 추출합니다. 예: \"[오전 12:02]\"\n",
+        "\n",
+        "- (.+): 내용을 추출합니다. 예: \"ㅋㅋㅋㅋㅋㅋㅋㅋㄱㅇㄱㅋㅋㅋㅋㅋ진짴ㅋㅋ\"\n",
+        "\n",
+        "\n",
+        "##python 예시\n",
+        "import re\n",
+        "\n",
+        "text = '''--------------- 2022년 1월 16일 일요일 ---------------\n",
+        "[민지이잉] [오전 12:02] ㅋㅋㅋㅋㅋㅋㅋㅋㄱㅇㄱㅋㅋㅋㅋㅋ진짴ㅋㅋ\n",
+        "[민지이잉] [오전 12:02] 다들 잘쟈!!!\n",
+        "[윤희] [오전 12:04] 구랭\n",
+        "[윤희] [오전 12:04] 잘쟈\n",
+        "\n",
+        "pattern = r\"(\\d{4}년 \\d{1,2}월 \\d{1,2}일 \\w+요일)\\s+\\[([^\\]]+)\\]\\s+\\[(오전|오후) \\d{1,2}:\\d{2}\\]\\s+(.+)\"\n",
+        "\n",
+        "matches = re.findall(pattern, text)\n",
+        "\n",
+        "for match in matches:\n",
+        "    print(f\"날짜: {match[0]}\")\n",
+        "    print(f\"사람: {match[1]}\")\n",
+        "    print(f\"시간: {match[2]} {match[3]}\")\n",
+        "    print(f\"내용: {match[4]}\")\n",
+        "    print('-' * 40)\n",
+        "\n",
+        "##결과\n",
+        "날짜: 2022년 1월 16일 일요일\n",
+        "사람: 민지이잉\n",
+        "시간: 오전 12:02\n",
+        "내용: ㅋㅋㅋㅋㅋㅋㅋㅋㄱㅇㄱㅋㅋㅋㅋㅋ진짴ㅋㅋ\n",
+        "----------------------------------------\n",
+        "날짜: 2022년 1월 16일 일요일\n",
+        "사람: 민지이잉\n",
+        "시간: 오전 12:02\n",
+        "내용: 다들 잘쟈!!!\n",
+        "----------------------------------------\n",
+        "날짜: 2022년 1월 16일 일요일\n",
+        "사람: 윤희\n",
+        "시간: 오전 12:04\n",
+        "내용: 구랭\n",
+        "----------------------------------------\n",
+        "...\n"
+      ],
+      "metadata": {
+        "id": "Llb4c44wYh_3"
+      }
+    }
+  ]
+}
